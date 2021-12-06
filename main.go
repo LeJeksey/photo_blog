@@ -20,6 +20,7 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
+//test git user
 //func authMiddleware(w http.ResponseWriter, r *http.Request)
 
 func index(w http.ResponseWriter, req *http.Request) {
