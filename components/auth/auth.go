@@ -3,7 +3,7 @@ package auth
 import (
 	"errors"
 	"net/http"
-	. "photo_blog/user"
+	. "photo_blog/models/user"
 )
 
 const sessionCookieName = "pb_session_id"

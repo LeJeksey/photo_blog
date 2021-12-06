@@ -2,31 +2,36 @@ package main
 
 import (
 	"html/template"
+	"io"
+	"log"
 	"net/http"
-	"photo_blog/auth"
+	"photo_blog/controllers/auth"
 )
 
 var tpl *template.Template
 
 func init() {
-	tpl = template.Must(template.ParseGlob("templates/*"))
+	tpl = template.Must(template.ParseGlob("views/templates/*"))
 }
 
 func main() {
-	http.HandleFunc("/", index)
-	http.HandleFunc("/login", login)
-	http.HandleFunc("/logout", logout)
-	http.Handle("/favicon.ico", http.NotFoundHandler())
-	http.ListenAndServe(":8080", nil)
+	mux := http.NewServeMux()
+
+	mux.Handle("/", auth.Middleware(http.HandlerFunc(index)))
+	mux.HandleFunc("/login", index2)
+
+	//mux.HandleFunc("/logout", logout)
+
+	mux.Handle("/favicon.ico", http.NotFoundHandler())
+
+	log.Fatal(http.ListenAndServe("", mux))
 }
 
-//func authMiddleware(w http.ResponseWriter, r *http.Request)
-
 func index(w http.ResponseWriter, req *http.Request) {
-	authUser, err := auth.GetAuthUser(req)
-	if err == auth.ErrNoAuthUser {
-		http.Redirect(w, req, "/login", http.StatusSeeOther)
-	}
+	tpl.ExecuteTemplate(w, "index.gohtml", nil)
+}
 
+func index2(w http.ResponseWriter, req *http.Request) {
+	io.WriteString(w, "check")
 	tpl.ExecuteTemplate(w, "index.gohtml", nil)
 }
