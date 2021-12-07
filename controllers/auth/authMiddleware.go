@@ -1,16 +1,20 @@
 package auth
 
 import (
+	"context"
 	"log"
 	"net/http"
-	"photo_blog/components/auth"
 )
+
+type contextKey string
+
+const userContextKey contextKey = "userContext"
 
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authUser, err := auth.GetAuthUser(r)
+		authUser, err := getAuthUser(r)
 		if err != nil {
-			if err == auth.ErrNoAuthUser {
+			if err == ErrNoAuthUser {
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
 			}
@@ -19,7 +23,8 @@ func Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		_ = authUser
-		next.ServeHTTP(w, r)
+		ctxWithUser := context.WithValue(r.Context(), userContextKey, authUser)
+
+		next.ServeHTTP(w, r.WithContext(ctxWithUser))
 	})
 }

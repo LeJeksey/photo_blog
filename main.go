@@ -1,24 +1,17 @@
 package main
 
 import (
-	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"photo_blog/controllers/auth"
+	"photo_blog/views"
 )
-
-var tpl *template.Template
-
-func init() {
-	tpl = template.Must(template.ParseGlob("views/templates/*"))
-}
 
 func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/", auth.Middleware(http.HandlerFunc(index)))
-	mux.HandleFunc("/login", index2)
+	mux.HandleFunc("/login", auth.Login)
 
 	//mux.HandleFunc("/logout", logout)
 
@@ -28,10 +21,5 @@ func main() {
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
-	tpl.ExecuteTemplate(w, "index.gohtml", nil)
-}
-
-func index2(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "check")
-	tpl.ExecuteTemplate(w, "index.gohtml", nil)
+	views.Tpl().ExecuteTemplate(w, "index.gohtml", nil)
 }
