@@ -12,8 +12,7 @@ func main() {
 
 	mux.Handle("/", auth.Middleware(http.HandlerFunc(index)))
 	mux.HandleFunc("/login", auth.Login)
-
-	//mux.HandleFunc("/logout", logout)
+	mux.Handle("/logout", auth.Middleware(http.HandlerFunc(auth.Logout)))
 
 	mux.Handle("/favicon.ico", http.NotFoundHandler())
 
@@ -21,5 +20,9 @@ func main() {
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
-	views.Tpl().ExecuteTemplate(w, "index.gohtml", nil)
+	authUser := auth.GetUserFromSession(req)
+
+	if err := views.Tpl().ExecuteTemplate(w, "index.gohtml", authUser); err != nil {
+		log.Println(err)
+	}
 }

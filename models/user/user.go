@@ -6,15 +6,13 @@ import (
 )
 
 type User struct {
-	Id       int
 	Login    string
 	PassHash []byte
-	Name     string
 }
 
 var users = map[string]*User{
-	"admin": {Login: "admin", PassHash: []byte("admin")},
-	"test":  {Login: "test", PassHash: []byte("test")},
+	"admin": {Login: "admin", PassHash: []byte("$2a$04$fU.P6Id4ntlMnQWwqny27OLKxwpDUEVhtVPtTfXj5SSGePOCeZnkK")},
+	"test":  {Login: "test", PassHash: []byte("$2a$04$L6JsPcj86.PIFvD5alKVse2ZxhZz5VevOx3m3Q.tYrPF.Go0eeMgq")},
 }
 
 type UnknownLoginError string
@@ -35,14 +33,7 @@ func CheckPassword(login string, password string) (*User, error) {
 		return nil, UnknownLoginError(login)
 	}
 
-	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = bcrypt.CompareHashAndPassword(user.PassHash, passHash); err != nil {
-		// TODO: delete it
-		log.Println(string(passHash))
+	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(password)); err != nil {
 
 		if err != bcrypt.ErrMismatchedHashAndPassword {
 			log.Println("unknown error in password matching: ", err)

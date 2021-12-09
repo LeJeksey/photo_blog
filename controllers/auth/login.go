@@ -8,12 +8,19 @@ import (
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
+	if IsUserAuthorized(r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	if r.Method == http.MethodPost {
 		handleLogin(w, r)
 		return
 	}
 
-	views.Tpl().ExecuteTemplate(w, "login.gohtml", nil)
+	if err := views.Tpl().ExecuteTemplate(w, "login.gohtml", nil); err != nil {
+		log.Println(err)
+	}
 }
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -31,8 +38,14 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Bad login or password", http.StatusForbidden)
 		log.Println("Bad try to login:", err)
+		return
 	}
 
-	// TODO: create session, write sessId to Cookie, redirect to index
-	CreateSession(authUser)
+	if _, err = createSession(w, authUser); err != nil {
+		http.Error(w, "Invalid session", http.StatusInternalServerError)
+		log.Println("createSession:", err)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
