@@ -8,7 +8,11 @@ import (
 	"photo_blog/views"
 )
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func Login() http.HandlerFunc {
+	return login
+}
+
+func login(w http.ResponseWriter, r *http.Request) {
 	if auth.IsUserAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
