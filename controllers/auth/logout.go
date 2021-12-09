@@ -3,10 +3,11 @@ package auth
 import (
 	"log"
 	"net/http"
+	"photo_blog/components/auth"
 )
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	if err := destroySession(w, r); err != nil {
+	if err := auth.DestroySession(w, r); err != nil {
 		log.Println("Logout error:", err)
 	}
 

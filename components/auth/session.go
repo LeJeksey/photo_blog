@@ -45,7 +45,7 @@ func getSessionIdFromCookie(req *http.Request) (SessionId, error) {
 	return sessId, nil
 }
 
-func createSession(w http.ResponseWriter, user *User) (SessionId, error) {
+func CreateSession(w http.ResponseWriter, user *User) (SessionId, error) {
 	sUuid, err := uuid.NewRandom()
 	if err != nil {
 		return "", err
@@ -65,7 +65,7 @@ func createSession(w http.ResponseWriter, user *User) (SessionId, error) {
 	return sessId, nil
 }
 
-func destroySession(w http.ResponseWriter, req *http.Request) error {
+func DestroySession(w http.ResponseWriter, req *http.Request) error {
 	sessId, err := getSessionIdFromCookie(req)
 	if err != nil {
 		return err

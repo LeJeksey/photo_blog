@@ -3,12 +3,13 @@ package auth
 import (
 	"log"
 	"net/http"
+	"photo_blog/components/auth"
 	"photo_blog/models/user"
 	"photo_blog/views"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	if IsUserAuthorized(r) {
+	if auth.IsUserAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -41,7 +42,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err = createSession(w, authUser); err != nil {
+	if _, err = auth.CreateSession(w, authUser); err != nil {
 		http.Error(w, "Invalid session", http.StatusInternalServerError)
 		log.Println("createSession:", err)
 		return
