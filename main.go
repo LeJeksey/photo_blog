@@ -16,7 +16,7 @@ func main() {
 	mux.Handle("/login", authController.Login())
 	mux.Handle("/logout", auth.Middleware(authController.Logout()))
 
-	//mux.Handle("/upload", auth.Middleware(http.HandlerFunc()pictures.Upload))
+	mux.Handle("/upload", auth.Middleware(pictures.Upload()))
 
 	mux.Handle("/favicon.ico", http.NotFoundHandler())
 
