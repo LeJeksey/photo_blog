@@ -18,6 +18,15 @@ func main() {
 
 	mux.Handle("/upload", auth.Middleware(pictures.Upload()))
 
+	picsPath, err := pictures.GetPicsPath()
+	if err != nil {
+		log.Fatal(err)
+	}
+	mux.Handle("/pictures/", auth.Middleware(http.StripPrefix("/pictures", http.FileServer(http.Dir(picsPath)))))
+
+	mux.Handle("/blog", auth.Middleware(pictures.Blog()))
+	mux.Handle("/blog/", auth.Middleware(pictures.UserBlog()))
+
 	mux.Handle("/favicon.ico", http.NotFoundHandler())
 
 	log.Fatal(http.ListenAndServe("", mux))

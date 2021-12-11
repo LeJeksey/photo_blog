@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-const userPicturesDir = "contentStore"
+const UserPicturesDir = "contentStore"
 
 func Upload() http.HandlerFunc {
 	return upload
@@ -112,7 +112,7 @@ func createUserDirIfNeeded(userName string) (string, error) {
 		return "", err
 	}
 
-	userPath := filepath.Join(wd, userPicturesDir, userName)
+	userPath := filepath.Join(wd, UserPicturesDir, userName)
 	if err := os.MkdirAll(userPath, os.ModePerm); err != nil {
 		return "", err
 	}
