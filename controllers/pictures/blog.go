@@ -14,7 +14,7 @@ func Blog() http.HandlerFunc {
 	return blog
 }
 
-func blog(w http.ResponseWriter, req *http.Request) {
+func blog(w http.ResponseWriter, _ *http.Request) {
 	picsPath, err := GetPicsPath()
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
