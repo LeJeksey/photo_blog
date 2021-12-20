@@ -1,14 +1,23 @@
 package user
 
 import (
+	"context"
+	"errors"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"photo_blog/components/db"
 )
 
 type User struct {
-	Login    string
-	PassHash []byte
+	Id       primitive.ObjectID `bson:"_id"`
+	Login    string             `bson:"login"`
+	PassHash []byte             `bson:"passHash"`
 }
+
+const usersCollectionName = "users"
 
 var users = map[string]*User{
 	"admin": {Login: "admin", PassHash: []byte("$2a$04$fU.P6Id4ntlMnQWwqny27OLKxwpDUEVhtVPtTfXj5SSGePOCeZnkK")},
@@ -43,4 +52,78 @@ func CheckPassword(login string, password string) (*User, error) {
 	}
 
 	return user, nil
+}
+
+func getUserById(id primitive.ObjectID) (*User, error) {
+
+	return nil, nil
+}
+
+func (u *User) Save(ctx context.Context) (primitive.ObjectID, error) {
+	if u.Id != primitive.NilObjectID {
+		err := u.update(ctx)
+		if err != nil {
+			return primitive.NilObjectID, err
+		}
+	} else {
+		_, err := u.insert(ctx)
+		if err != nil {
+			return primitive.NilObjectID, err
+		}
+	}
+
+	return u.Id, nil
+}
+
+var ErrDatabaseConnection = errors.New("error while connecting to database")
+var ErrInsert = errors.New("error while inserting to database")
+
+func (u *User) insert(ctx context.Context) (primitive.ObjectID, error) {
+	uc, err := getUserCollection(ctx)
+	if err != nil {
+		log.Println("User.insert: ", err)
+		return primitive.NilObjectID, ErrDatabaseConnection
+	}
+
+	u.Id = primitive.NewObjectID()
+	_, err = uc.InsertOne(ctx, u)
+	if err != nil {
+		log.Println("User.insert: ", err)
+		return primitive.NilObjectID, ErrInsert
+	}
+
+	return u.Id, nil
+}
+
+var ErrUpdate = errors.New("error while updating to database")
+
+func (u *User) update(ctx context.Context) error {
+	uc, err := getUserCollection(ctx)
+	if err != nil {
+		log.Println("User.update: ", err)
+		return ErrDatabaseConnection
+	}
+
+	filter := bson.M{"_id": u.Id}
+	updateData, err := db.GetStructAsBsonM(u)
+	if err != nil {
+		log.Println("User.update: ", err)
+		return ErrUpdate
+	}
+
+	if _, err = uc.UpdateOne(ctx, filter, updateData); err != nil {
+		log.Println("User.update: ", err)
+		return ErrUpdate
+	}
+
+	return nil
+}
+
+func getUserCollection(ctx context.Context) (*mongo.Collection, error) {
+	client, err := db.Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Database(db.CommonDbName).Collection(usersCollectionName), nil
 }

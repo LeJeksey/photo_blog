@@ -15,6 +15,7 @@ func main() {
 	mux.Handle("/", auth.Middleware(index()))
 	mux.Handle("/login", authController.Login())
 	mux.Handle("/logout", auth.Middleware(authController.Logout()))
+	mux.Handle("/signUp", authController.SignUp())
 
 	mux.Handle("/upload", auth.Middleware(pictures.Upload()))
 
