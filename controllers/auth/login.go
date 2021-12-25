@@ -39,7 +39,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	login := r.FormValue("login")
 	password := r.FormValue("password")
 
-	authUser, err := user.CheckPassword(login, password)
+	authUser, err := user.CheckPassword(r.Context(), login, password)
 	if err != nil {
 		http.Error(w, "Bad login or password", http.StatusForbidden)
 		log.Println("Bad try to login:", err)

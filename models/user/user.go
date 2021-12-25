@@ -36,9 +36,10 @@ func (bp BadPasswordError) Error() string {
 	return "bad password for user with login:" + string(bp)
 }
 
-func CheckPassword(login string, password string) (*User, error) {
-	user, ok := users[login]
-	if !ok {
+func CheckPassword(ctx context.Context, login string, password string) (*User, error) {
+	user, err := getUserByLogin(ctx, login)
+	if err != nil {
+		log.Println(err)
 		return nil, UnknownLoginError(login)
 	}
 
@@ -54,9 +55,23 @@ func CheckPassword(login string, password string) (*User, error) {
 	return user, nil
 }
 
-func getUserById(id primitive.ObjectID) (*User, error) {
+func getUserByLogin(ctx context.Context, login string) (*User, error) {
+	uc, err := getUserCollection(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	res := uc.FindOne(ctx, bson.M{"login": login})
+	if res.Err() != nil {
+		return nil, res.Err()
+	}
+
+	var currUser User
+	if err := res.Decode(&currUser); err == nil {
+		return &currUser, nil
+	} else {
+		return nil, err
+	}
 }
 
 func (u *User) Save(ctx context.Context) (primitive.ObjectID, error) {

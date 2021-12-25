@@ -14,7 +14,9 @@ func SignUp() http.HandlerFunc {
 
 func signUp(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		handleSignUp(w, r)
+		if err := handleSignUp(w, r); err != nil {
+			return
+		}
 	}
 
 	if err := views.Tpl().ExecuteTemplate(w, "signUp.gohtml", nil); err != nil {
@@ -22,15 +24,15 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleSignUp(w http.ResponseWriter, r *http.Request) {
+func handleSignUp(w http.ResponseWriter, r *http.Request) error {
 	login := r.FormValue("login")
 	password := r.FormValue("password")
 
 	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Println("handleSignUp GenerateFromPassword:", err)
-		return
+		return err
 	}
 
 	u := &user.User{Login: login, PassHash: passHash}
@@ -38,8 +40,10 @@ func handleSignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Can't sign up", http.StatusInternalServerError)
 		log.Println("handleSignUp User.Save:", err)
-		return
+		return err
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+
+	return nil
 }

@@ -12,6 +12,7 @@ const sessionMaxAge = 3600 * 4
 
 type SessionId string
 
+// todo: here i can use redis or analog, but i didn't want =)
 var sessions map[SessionId]*User
 
 func init() {
