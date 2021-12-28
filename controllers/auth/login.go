@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"photo_blog/components/auth"
-	"photo_blog/models/user"
+	"photo_blog/services/users"
 	"photo_blog/views"
 )
 
@@ -39,14 +39,14 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	login := r.FormValue("login")
 	password := r.FormValue("password")
 
-	authUser, err := user.CheckPassword(r.Context(), login, password)
+	authUser, err := users.Service.CheckPassword(r.Context(), login, password)
 	if err != nil {
 		http.Error(w, "Bad login or password", http.StatusForbidden)
 		log.Println("Bad try to login:", err)
 		return
 	}
 
-	if _, err = auth.CreateSession(w, authUser); err != nil {
+	if _, err = auth.SessionManager.Create(w, authUser); err != nil {
 		http.Error(w, "Invalid session", http.StatusInternalServerError)
 		log.Println("createSession:", err)
 		return

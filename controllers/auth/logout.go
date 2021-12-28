@@ -10,7 +10,7 @@ func Logout() http.HandlerFunc {
 	return logout
 }
 func logout(w http.ResponseWriter, r *http.Request) {
-	if err := auth.DestroySession(w, r); err != nil {
+	if err := auth.SessionManager.Destroy(w, r); err != nil {
 		log.Println("Logout error:", err)
 	}
 
