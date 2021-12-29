@@ -36,7 +36,6 @@ func main() {
 func index() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		authUser := auth.GetUserFromSession(req)
-		pictures.StoreValuesToCookie(w, req)
 
 		if err := views.Tpl().ExecuteTemplate(w, "index.gohtml", authUser); err != nil {
 			log.Println(err)

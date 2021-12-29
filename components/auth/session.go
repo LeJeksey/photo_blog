@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"net/http"
-	. "photo_blog/models/user"
+	"photo_blog/models/user"
 )
 
 const sessionCookieName = "pb_session_id"
@@ -12,25 +12,25 @@ const sessionMaxAge = 3600 * 4
 
 type SessionId string
 
-var sessions map[SessionId]*User
+var sessions map[SessionId]*user.User
 
 type SessionManagerInterface interface {
-	Create(w http.ResponseWriter, user *User) (SessionId, error)
+	Create(w http.ResponseWriter, user *user.User) (SessionId, error)
 	Destroy(w http.ResponseWriter, req *http.Request) error
 }
 
 type sessionManager struct{}
 
-var SessionManager *sessionManager
+var SessionManager SessionManagerInterface
 
 func init() {
-	sessions = make(map[SessionId]*User)
+	sessions = make(map[SessionId]*user.User)
 	SessionManager = &sessionManager{}
 }
 
 var ErrNoAuthUser = errors.New("user is not authorized")
 
-var getAuthUser = func(req *http.Request) (*User, error) {
+var getAuthUser = func(req *http.Request) (*user.User, error) {
 	sessId, err := getSessionIdFromCookie(req)
 	if err != nil {
 		return nil, ErrNoAuthUser
@@ -55,7 +55,7 @@ var getSessionIdFromCookie = func(req *http.Request) (SessionId, error) {
 	return sessId, nil
 }
 
-func (sm *sessionManager) Create(w http.ResponseWriter, user *User) (SessionId, error) {
+func (sm *sessionManager) Create(w http.ResponseWriter, user *user.User) (SessionId, error) {
 	sUuid, err := uuid.NewRandom()
 	if err != nil {
 		return "", err
